@@ -195,7 +195,7 @@ def candlestick2_ohlc(ax, opens, highs, lows, closes, width=4,
 
 def _normalize_by_dataset(list1, list2, from_origin=False):
     """Normalize list1 to be in the same interval as list2, i.e. [0, max(list2)]"""
-
+    
     if not from_origin:
         # To scale variable x from dataset X into range [a,b] we use:
         # x_norm = ( (b-a) * ( (x-min(X)) / (max(X)-min(X)) ) + a
@@ -206,15 +206,15 @@ def _normalize_by_dataset(list1, list2, from_origin=False):
                             max(list1) - min(
                         list1))) + min(list2))
             normalized_list1.append(x_norm)
-
+    
         return normalized_list1
-
+    
     else:
         normalized_list1 = []
         for i in range(len(list1)):
             x_norm = ((max(list2)) * ((list1[i] - min(list1)) / (max(list1) - min(list1) + 0.0000001)))
             normalized_list1.append(x_norm)
-
+    
         return normalized_list1
 
 def remove_labels():
@@ -232,14 +232,14 @@ def create_chart(candles_df, tech_inds_df=None):
     # Plot Price
     candles_df.plot(x='time', y='close', ax=ax0, color='black', label='_nolegend_', linewidth=2)
     remove_labels()
-    
+
     # Plot Technical Indicators
     if tech_inds_df:
         for col_name in tech_inds_df:
             ti_df = candles_df[['time', col_name]].copy()
             ti_df.plot(x='time', y=col_name, ax=ax0, label='_nolegend_')
         remove_labels()
-    
+
     # Plot candlesticks
     ax1 = fig.add_subplot(412)
     
@@ -247,16 +247,16 @@ def create_chart(candles_df, tech_inds_df=None):
         width=0.4, colorup='g', colordown='r', ax=ax1, opens=candles_df['open'],
         closes=candles_df['close'], highs=candles_df['high'], lows=candles_df['low']
         )
-    
+
     remove_labels()
     
     # Plot Volume as Bar Chart on the bottom
     time_list = candles_df['time'].tolist()
     volume_list = candles_df['volume'].tolist()
     norm_volume_list = _normalize_by_dataset(volume_list, candles_df['close'], from_origin=True)
-    
+
     ax2 = fig.add_subplot(413)
-    
+
     vol_df = pd.DataFrame(list(zip(time_list, norm_volume_list)), columns=['time', 'volume'])
     vol_df.plot.bar(x='time', y='volume', ax=ax2, label='_nolegend_')
     remove_labels()
@@ -266,10 +266,15 @@ def chart_to_image(candles_df, file_name, tech_inds_df=None):
     """Creates the specified chart and saves it to an image at file_name location"""
     fig = create_chart(candles_df, tech_inds_df)
     # change resolution of image to 224x224
-    resize_plot(fig, 224.0, 224.0)
+    #resize_plot(fig, 380.0, 380.0)
+    DPI=96.0
+    width_px=380.0
+    height_px=380.0
+    fig.set_size_inches(width_px/DPI,height_px/DPI) 
     # remove labels and titles 
     remove_labels()
-    plt.savefig(file_name, legend=False, bbox_inches='tight', dpi=85)
+    print(fig.get_size_inches()*fig.dpi)
+    plt.savefig(file_name, legend=False, bbox_inches='tight', dpi=1)
     # close all open plots to save memory
     plt.close('all')
     # restore warnings
@@ -281,7 +286,7 @@ def chart_to_arr(candles_df, tech_inds_df=None):
     fig = create_chart(candles_df, tech_inds_df)
 
     # change resolution of image to 224x224
-    resize_plot(fig, 224.0, 224.0)
+    resize_plot(fig, 380.0, 380.0)
     
     # remove labels and titles 
     remove_labels()
