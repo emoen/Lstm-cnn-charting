@@ -265,6 +265,7 @@ def create_chart(candles_df, tech_inds_df=None):
     ax3 = fig.add_subplot(414)
     candles_df.plot(x='time', y='macd', ax=ax3, legend=False, color='red', linewidth=2) # #E5A4CB red
     candles_df.plot(x='time', y='signal', ax=ax3, legend=False, color='gray', linewidth=2) # #EBD2BE yellow
+    #ax3.hist(candles_df.macd)
     remove_labels()
     return fig
 
@@ -274,12 +275,12 @@ def chart_to_image(candles_df, file_name, tech_inds_df=None):
     # change resolution of image to 224x224
     #resize_plot(fig, 380.0, 380.0)
     DPI=96.0
-    width_px=380.0
-    height_px=380.0
+    width_px=400.0 #380
+    height_px=400.0
     fig.set_size_inches(width_px/DPI,height_px/DPI) 
     # remove labels and titles 
     remove_labels()
-    print(fig.get_size_inches()*fig.dpi)
+    #print(fig.get_size_inches()*fig.dpi)
     plt.savefig(file_name, legend=False, bbox_inches='tight', dpi=100)
     # close all open plots to save memory
     plt.close('all')
