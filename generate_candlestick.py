@@ -1,7 +1,7 @@
 #https://medium.com/analytics-vidhya/predicting-stock-price-with-a-feature-fusion-gru-cnn-neural-network-in-pytorch-1220e1231911
 import yfinance as yf
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from charting import chart_to_image, chart_to_arr
@@ -29,19 +29,23 @@ def test_charting():
     low = low.reshape(-1,1)
     norm_low = scaler.fit_transform(low)
 
-    pho_norm = pd.DataFrame(columns=['time','open','high', 'low','close','volume'])
+    pho_norm = pd.DataFrame(columns=['time','open','high', 'low','close','volume','ewm26','ewm12','macd', 'signal'])
     pho_norm.time = hist.index
     pho_norm.open = norm_open
     pho_norm.close = norm_close
     pho_norm.high = norm_high
     pho_norm.low = norm_low
     pho_norm.volume = hist.Volume.values
+    pho_norm.ewm26 = pho_norm.close.ewm(span=26,adjust=False).mean()
+    pho_norm.ewm12 = pho_norm.close.ewm(span=12,adjust=False).mean()
+    pho_norm.macd = pho_norm.ewm12 - pho_norm.ewm26
+    pho_norm.signal = pho_norm.macd.ewm(span=9, adjust=False).mean()
 
     print(pho_norm.shape)
-    
-    arr = chart_to_arr(pho_norm)
+
+    arr = chart_to_arr(pho_norm.tail(30))
     assert arr.shape == (3, 224, 224)
-    chart_to_image(pho_norm, 'test_pho.png')
+    chart_to_image(pho_norm.tail(30), 'test_pho.png')
 
 
 #Generating Chart Images - 224 x 224 

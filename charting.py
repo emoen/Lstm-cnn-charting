@@ -230,16 +230,16 @@ def create_chart(candles_df, tech_inds_df=None):
     # Create axis for the price and technical indicator graph
     ax0 = fig.add_subplot(411)
     # Plot Price
-    candles_df.plot(x='time', y='close', ax=ax0, color='black', label='_nolegend_', linewidth=2)
+    candles_df.plot(x='time', y='close', ax=ax0, legend=False, color='black', linewidth=2)
     remove_labels()
-
+    
     # Plot Technical Indicators
     if tech_inds_df:
         for col_name in tech_inds_df:
             ti_df = candles_df[['time', col_name]].copy()
-            ti_df.plot(x='time', y=col_name, ax=ax0, label='_nolegend_')
+            ti_df.plot(x='time', y=col_name, ax=ax0, legend=False)
         remove_labels()
-
+    
     # Plot candlesticks
     ax1 = fig.add_subplot(412)
     
@@ -247,18 +247,24 @@ def create_chart(candles_df, tech_inds_df=None):
         width=0.4, colorup='g', colordown='r', ax=ax1, opens=candles_df['open'],
         closes=candles_df['close'], highs=candles_df['high'], lows=candles_df['low']
         )
-
+    
     remove_labels()
     
     # Plot Volume as Bar Chart on the bottom
     time_list = candles_df['time'].tolist()
     volume_list = candles_df['volume'].tolist()
     norm_volume_list = _normalize_by_dataset(volume_list, candles_df['close'], from_origin=True)
-
+    
     ax2 = fig.add_subplot(413)
-
+    
     vol_df = pd.DataFrame(list(zip(time_list, norm_volume_list)), columns=['time', 'volume'])
-    vol_df.plot.bar(x='time', y='volume', ax=ax2, label='_nolegend_')
+    vol_df.plot.bar(x='time', y='volume', ax=ax2, legend=False)
+    remove_labels()
+    
+    #MACD
+    ax3 = fig.add_subplot(414)
+    candles_df.plot(x='time', y='macd', ax=ax3, legend=False, color='red', linewidth=2) # #E5A4CB red
+    candles_df.plot(x='time', y='signal', ax=ax3, legend=False, color='gray', linewidth=2) # #EBD2BE yellow
     remove_labels()
     return fig
 
@@ -274,7 +280,7 @@ def chart_to_image(candles_df, file_name, tech_inds_df=None):
     # remove labels and titles 
     remove_labels()
     print(fig.get_size_inches()*fig.dpi)
-    plt.savefig(file_name, legend=False, bbox_inches='tight', dpi=1)
+    plt.savefig(file_name, legend=False, bbox_inches='tight', dpi=100)
     # close all open plots to save memory
     plt.close('all')
     # restore warnings
@@ -282,19 +288,19 @@ def chart_to_image(candles_df, file_name, tech_inds_df=None):
 
 def chart_to_arr(candles_df, tech_inds_df=None):
     """Creates the specified chart and returns its numpy arr representation"""
-
+    
     fig = create_chart(candles_df, tech_inds_df)
-
+    
     # change resolution of image to 224x224
     resize_plot(fig, 380.0, 380.0)
     
     # remove labels and titles 
     remove_labels()
-
+    
     # If we haven't already shown or saved the plot, then we need to
     # draw the figure first...
     fig.canvas.draw()
-
+    
     # Now we can save it to a numpy array.
     data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
     data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
