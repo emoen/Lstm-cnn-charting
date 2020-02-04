@@ -231,7 +231,7 @@ def create_chart(candles_df, tech_inds_df=None):
     ax0 = fig.add_subplot(411)
     # Plot Price
     candles_df.plot(x='time', y='close', ax=ax0, legend=False, color='black', linewidth=2)
-    remove_labels()
+    #remove_labels()
     
     # Plot Technical Indicators
     if tech_inds_df:
@@ -281,6 +281,7 @@ def chart_to_image(candles_df, file_name, tech_inds_df=None):
     # remove labels and titles 
     remove_labels()
     #print(fig.get_size_inches()*fig.dpi)
+    candles_df.to_csv(file_name+".txt", index=False, sep=",")
     plt.savefig(file_name, legend=False, bbox_inches='tight', dpi=100)
     # close all open plots to save memory
     plt.close('all')
